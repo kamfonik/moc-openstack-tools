@@ -7,7 +7,7 @@ TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_DIR = os.path.abspath(os.path.join(TEST_DIR, os.pardir))
 sys.path.insert(0, PROJECT_DIR)
 
-from message import TemplateMessage
+from message import TemplateMessage, Message
 
 
 def test_template():
@@ -28,3 +28,39 @@ def test_template():
     msg = TemplateMessage(sender=sender, email=receiver, template=template,
                           **items)
     assert msg.body == result
+   
+def _file_dump(tmpdir, subject=None, label=None):
+    addr = 'dummy.email@moc.org'
+    body = 'Body of the email'
+
+    if label is not None:
+        tag = label
+    elif subject is not None:
+        tag = subject
+    else:
+        tag = None
+
+    expected_file_name = 'dummy.email_{0}.txt'.format(tag)
+
+    msg = Message(sender=addr, receiver=addr, body=body, subject=subject)
+ 
+    msg_path = msg.dump_to_file(target_path='{}'.format(tmpdir), label=label)
+
+    assert os.path.isfile(msg_path)
+
+    assert os.path.basename(msg_path) == expected_file_name
+
+    with open(msg_path, 'r') as f:
+        assert f.read() == body
+ 
+    # clean up
+    os.remove(msg_path)
+
+def test_file_dump(tmpdir):
+    _file_dump(tmpdir)
+
+    _file_dump(tmpdir, subject="foo")
+
+    _file_dump(tmpdir, label="bar")
+    
+    _file_dump(tmpdir, subject="foo", label="bar")
