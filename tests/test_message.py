@@ -61,36 +61,61 @@ def test_send(mock_smtp):
 
 
 @mock.patch('message.open', new_callable=mock.mock_open, create=True)  
-def _file_dump(m_op):
+def _file_dump(mock_open, subject=None, label=None, target_path=None):
     msg_values = { 'sender': 'dummy@moc.org',
                    'receiver': 'newuser1@moc.org',
-                   'subject': 'Test Message Subject',
+                   'subject': subject,
                    'body': 'This is a Test.'
                  }
     
-    expected_file_name = '/tmp/newuser1_Test Message Subject.txt'
- 
-    msg = Message(**msg_values)
+    # `label` and `target_path` should only be passed to dump_to_file() if
+    # explicitly specified in the test call. Omitting them tests the default
+    # values.  To achieve this, construct file_dump_kwargs and pass with **
+    file_dump_kwargs = {}
     
-    msg_path = msg.dump_to_file()
- 
-    m_op.assert_called_with(expected_file_name, 'w')
-
-    mock_file_handle = m_op()
-
+    if label is not None:
+        file_tag = label
+        file_dump_kwargs['label'] = label
+    elif subject is not None:
+        file_tag = subject
+    else: 
+        file_tag = None 
+    
+    # construct the correct path and name of the output file
+    expected_file_name = 'newuser1_{0}.txt'.format(file_tag)
+    if target_path is not None:
+        expected_file_name = '{0}/{1}'.format(target_path.rstrip('/'), 
+                                              expected_file_name)
+        file_dump_kwargs['target_path'] = target_path
+    else:
+        expected_file_name = '/tmp/{0}'.format(expected_file_name)
+    
+  
+    msg = Message(**msg_values)
+    dumped_file_name = msg.dump_to_file(**file_dump_kwargs)
+    
+    assert dumped_file_name == expected_file_name
+    mock_open.assert_called_with(expected_file_name, 'w')
+    
+    mock_file_handle = mock_open()
     assert mock_file_handle.write.call_count == 1
     mock_file_handle.write.assert_called_with(msg_values['body'])
-    
-
 
 
 def test_file_dump():
-#    _file_dump(tmpdir)
-     _file_dump()
-    #_file_dump(tmpdir, subject="foo")
+    """Test the function which writes email text to a file"""
+    
+    subject = 'Test Message Subject'
+    target_path = '/testdir/'
+    label = 'MessageLabel'
 
-    #_file_dump(tmpdir, label="bar")
-
-    #_file_dump(tmpdir, subject="foo", label="bar")
-   
+    _file_dump()
+    _file_dump(subject=subject)    
+    _file_dump(label=label)
+    _file_dump(target_path=target_path)
+    _file_dump(subject=subject, label=label)
+    _file_dump(subject=subject, target_path=target_path)
+    _file_dump(label=label, target_path=target_path)
+    _file_dump(subject=subject, label=label, target_path=target_path)
+ 
 
