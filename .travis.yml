@@ -20,5 +20,5 @@ install:
 
 script:
   - py.test --ignore=keystone
-  - flake8
+  #- flake8
 
