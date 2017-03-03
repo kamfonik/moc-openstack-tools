@@ -11,7 +11,7 @@ cache:
 
 install:
     - pip install flake8 pytest python-novaclient python-neutronclient python-cinderclient
-    - git clone https://github.com/openstack-dev/devstack/tree/stable/mitaka
+    - git clone https://github.com/openstack-dev/devstack.git -b stable/mitaka
     - cd devstack
     - ./stack.sh
 
