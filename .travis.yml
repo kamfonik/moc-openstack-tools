@@ -15,7 +15,7 @@ before_install:
     - tar -xvf /tmp/keystone.tar.gz -C /tmp
     - cd /tmp/keystone-9.0.0
     - pip install -r requirements.txt
-    - python setup.py install
+    - sudo python setup.py install
 
 
 install:
