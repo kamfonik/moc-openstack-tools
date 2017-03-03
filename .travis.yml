@@ -12,9 +12,9 @@ cache:
 
 install:
     - pip install flake8 pytest python-novaclient python-neutronclient python-cinderclient
-    - git clone https://github.com/openstack-dev/devstack.git -b stable/mitaka
-    - cd devstack
-    - ./stack.sh
+    - git clone https://github.com/openstack/keystone.git -b stable/mitaka
+    - cd keystone
+    - pip install .
 
 script:
   - py.test
