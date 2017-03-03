@@ -1,7 +1,7 @@
 language: python
 python:
   - "2.7"
-sudo: required
+#sudo: required
 
 branches:
   only:
@@ -12,6 +12,7 @@ cache:
 
 install:
     - pip install flake8 pytest python-novaclient python-neutronclient python-cinderclient
+    - cd /tmp
     - git clone https://github.com/openstack/keystone.git -b stable/mitaka
     - cd keystone
     - pip install .
