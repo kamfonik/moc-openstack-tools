@@ -11,14 +11,16 @@ cache:
   - pip
 
 install:
-    - git clone https://github.com/openstack/keystone.git -b stable/mitaka
-    - cd keystone
-    - pip install -r requirements.txt
+    #- git clone https://github.com/openstack/keystone.git -b stable/mitaka
+    #- cd keystone
+    #- pip install -r requirements.txt
     #- pip install -r test-requirements.txt
-    - pip install .
+    #- pip 
+    - apt-get install keystone
     - pip install flake8 pytest python-novaclient python-neutronclient python-cinderclient
 
 script:
-  - py.test --ignore=keystone
-  #- flake8
+  - py.test
+  #- py.test --ignore=keystone
+  - flake8
 
