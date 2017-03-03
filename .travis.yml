@@ -11,8 +11,7 @@ cache:
   - pip
 
 install:
-    - pip install flake8 pytest python-novaclient python-neutronclient python-cinderclient
-    - cd /tmp
+    - pip install flake8 pytest python-novaclient python-neutronclient python-cinderclient fixtures
     - git clone https://github.com/openstack/keystone.git -b stable/mitaka
     - cd keystone
     - pip install .
