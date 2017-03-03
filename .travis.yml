@@ -17,6 +17,9 @@ install:
     #- pip install -r test-requirements.txt
     #- pip 
     - sudo apt-get install keystone
+    - mkdir ~/.keystone
+    - cp keystone.conf.sample ~/.keystone/keystone.conf
+    - keystone-manage boostrap --bootstrap-password traviskeystone
     - pip install flake8 pytest python-novaclient python-neutronclient python-cinderclient
 
 script:
