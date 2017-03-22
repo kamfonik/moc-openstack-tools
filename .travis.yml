@@ -19,7 +19,7 @@ before_install:
     - sudo apt-get autoclean 
     - sudo apt-get install mysql-client-core-5.5
     - sudo apt-get install mysql-server-core-5.5 
-    #- sudo apt-get install mysql-server-5.5
+    - sudo apt-get install mysql-server-5.5
     #- sudo apt-get install mysql-client-5.5
 
 install:
