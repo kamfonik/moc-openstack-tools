@@ -13,8 +13,10 @@ cache:
 
 install:
     - sudo useradd -d /opt/stack -m -s /bin/bash stack
+    - sudo cp local.conf /opt/stack/
+    - sudo chown stack:stack /opt/stack/local.conf
     - echo 'stack ALL=(ALL) NOPASSWD:ALL' | sudo tee -a /etc/sudoers
-    - sudo su - stack -c "git clone https://git.openstack.org/openstack-dev/devstack -b stable/mitaka ; cd devstack ; ./stack.sh ; echo 'stack'; echo 'stack'; echo 'stack';"
+    - sudo su - stack -c "git clone https://git.openstack.org/openstack-dev/devstack -b stable/mitaka; cp local.conf devstack ; cd devstack ; ./stack.sh;"
     - pip install flake8 pytest python-novaclient python-neutronclient python-cinderclient
 
 script:
