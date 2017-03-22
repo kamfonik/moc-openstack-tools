@@ -11,6 +11,11 @@ branches:
 cache:
   - pip
 
+before_install: 
+    - sudo apt-get purge mysql-client-core-5.6
+    - sudo apt-get autoremove
+    - sudo apt-get autoclean
+
 install:
     - sudo useradd -d /opt/stack -m -s /bin/bash stack
     - sudo cp local.conf /opt/stack/
