@@ -13,7 +13,7 @@ cache:
 
 before_install: 
     - sudo apt-get purge mysql-client-core-5.6
-    - sudo apt-get purge mysq-server-core-5.6
+    - sudo apt-get purge mysql-server-core-5.6
     - sudo apt-get remove mysql-client mysql-server
     - sudo rm /var/lib/mysql/debian-*.flag 
     - sudo apt-get autoremove
