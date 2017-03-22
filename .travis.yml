@@ -17,6 +17,7 @@ before_install:
     - sudo apt-get remove mysql-client mysql-server
     - sudo apt-get autoremove
     - sudo apt-get autoclean 
+    - sudo rm /var/lib/mysql/debian-5.6.flag
     - sudo apt-get install mysql-client-core-5.5
     - sudo apt-get install mysql-server-core-5.5 
     - sudo apt-get install mysql-server-5.5
