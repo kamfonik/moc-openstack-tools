@@ -13,6 +13,8 @@
 #   under the License.
 """Utility functions shared by multiple modules"""
 from os import path
+from keystoneauth1.identity import v3
+from keystoneauth1 import session
 
 
 def get_absolute_path(file_path):
@@ -49,3 +51,22 @@ def select_rows(match_value, col_index, all_rows, header=True):
     if header:
         select_rows.insert(0, (0, all_rows[0]))
     return select_rows
+
+
+def get_auth_session(config):
+    """Set up a a keystoneauth1 session using credentials from config file"""
+    
+    admin_user = config.get('auth', 'admin_user')
+    admin_pwd = config.get('auth', 'admin_pwd')
+    admin_project = config.get('auth', 'admin_project')
+    auth_url = config.get('auth', 'auth_url')
+
+    auth = v3.Password(auth_url=auth_url,
+                       username=admin_user,
+                       user_domain_id='default',
+                       password=admin_pwd,
+                       project_domain_id='default',
+                       project_name=admin_project)
+    auth_session = session.Session(auth=auth)
+
+    return auth_session

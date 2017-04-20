@@ -25,11 +25,9 @@ Usage:
 import argparse
 import ConfigParser
 from keystoneclient.v3 import client
-from keystoneauth1.identity import v3
-from keystoneauth1 import session
 
 from config import set_config_file
-from moc_utils import get_absolute_path, select_rows
+from moc_utils import get_absolute_path, select_rows, get_auth_session
 from quotas import QuotaManager
 from message import TemplateMessage
 import spreadsheet
@@ -175,23 +173,13 @@ if __name__ == "__main__":
     # configuration
     config = ConfigParser.ConfigParser()
     config.read(CONFIG_FILE)
-    admin_user = config.get('auth', 'admin_user')
-    admin_pwd = config.get('auth', 'admin_pwd')
-    admin_project = config.get('auth', 'admin_project')
-    auth_url = config.get('auth', 'auth_url')
     nova_version = config.get('nova', 'version')
     quota_auth_file = get_absolute_path(config.get('quota_sheet', 'auth_file'))
     quota_worksheet_key = config.get('quota_sheet', 'worksheet_key')
     quota_template = config.get('quota_email', 'template')
 
     # openstack auth
-    auth = v3.Password(auth_url=auth_url,
-                       username=admin_user,
-                       user_domain_id='default',
-                       project_name=admin_project,
-                       project_domain_id='default',
-                       password=admin_pwd)
-    session = session.Session(auth=auth)
+    session = get_auth_session(config)
     keystone = client.Client(session=session)
     all_ks_projects = keystone.projects.list()
     quota_manager = QuotaManager(session=session, nova_version=nova_version)

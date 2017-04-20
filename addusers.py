@@ -36,13 +36,11 @@ import re
 import ConfigParser
 import argparse
 from keystoneclient.v3 import client
-from keystoneauth1.identity import v3
-from keystoneauth1 import session
 
 # local
 import message
 import spreadsheet
-from moc_utils import get_absolute_path, select_rows
+from moc_utils import get_absolute_path, select_rows, get_auth_session
 from quotas import QuotaManager
 from setpass import SetpassClient, random_password
 from config import set_config_file
@@ -363,24 +361,15 @@ if __name__ == "__main__":
 
     config = ConfigParser.ConfigParser()
     config.read(CONFIG_FILE)
-
-    admin_user = config.get('auth', 'admin_user')
-    admin_pwd = config.get('auth', 'admin_pwd')
-    admin_project = config.get('auth', 'admin_project')
+    
     auth_url = config.get('auth', 'auth_url')
+    setpass_url = config.get('setpass', 'setpass_url')
     nova_version = config.get('nova', 'version')
 
-    setpass_url = config.get('setpass', 'setpass_url')
-    auth = v3.Password(auth_url=auth_url,
-                       username=admin_user,
-                       user_domain_id='default',
-                       password=admin_pwd,
-                       project_domain_id='default',
-                       project_name=admin_project)
-    session = session.Session(auth=auth)
-    
+    session = get_auth_session(config)
     openstack = Openstack(session=session, nova_version=nova_version,
                           setpass_url=setpass_url)
+    
     auth_file = get_absolute_path(config.get("excelsheet",
                                              "auth_file"))
     worksheet_key = config.get("excelsheet", "worksheet_key")

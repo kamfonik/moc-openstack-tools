@@ -33,13 +33,12 @@ import re
 import argparse
 import ConfigParser
 from keystoneclient.v3 import client
-from keystoneauth1.identity import v3
-from keystoneauth1 import session
 
 # local import
 from message import TemplateMessage
 from setpass import SetpassClient, random_password
 from config import set_config_file
+from moc_utils import get_auth_session
 
 
 def validate_pin(pin):
@@ -73,23 +72,13 @@ if __name__ == "__main__":
     config = ConfigParser.ConfigParser()
     config.read(CONFIG_FILE)
     
-    admin_user = config.get('auth', 'admin_user')
-    admin_pwd = config.get('auth', 'admin_pwd')
-    admin_project = config.get('auth', 'admin_project')
-    auth_url = config.get('auth', 'auth_url')
     setpass_url = config.get('setpass', 'setpass_url')
-    
-    auth = v3.Password(auth_url=auth_url,
-                       username=admin_user,
-                       user_domain_id='default',
-                       project_name=admin_project,
-                       project_domain_id='default',
-                       password=admin_pwd)
-    sess = session.Session(auth=auth)
+
+    sess = get_auth_session(config)
 
     setpass = SetpassClient(sess, setpass_url)
     keystone = client.Client(session=sess)
-  
+    
     user = [usr for usr in keystone.users.list() if usr.name == args.username]
     if not user:
         print "User {} not found".format(args.username)
