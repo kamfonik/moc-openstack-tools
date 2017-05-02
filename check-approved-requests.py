@@ -148,19 +148,18 @@ def build_request_details(request_list, template):
     return all_details
 
 
-def send_reminder(reminder_list, request_type, worksheet_key):
+def send_reminder(reminders, request_type, worksheet_key):
     """Send a reminder email about an application waiting for approval
     for more than 24 hours
     """
+    reminder_cfg = dict(config.items('email_defaults'))
+    reminder_cfg.update(dict(config.items('reminder')))
     request_details = build_request_details(
-        reminder_list, template='templates/reminder-template.txt')
+        request_list=reminders, template=reminder_cfg['detail_template'])
     spreadsheet_link = 'https://docs.google.com/spreadsheets/d/{}'.format(
         worksheet_key)
     
-    reminder_cfg = dict(config.items('email_defaults'))
-    reminder_cfg.update(dict(config.items('reminder')))
-   
-    reminder_cfg.update({'request_count': str(len(reminder_list)),
+    reminder_cfg.update({'request_count': str(len(reminders)),
                          'request_type': request_type,
                          'request_spreadsheet': spreadsheet_link,
                          'request_details': request_details})
@@ -214,8 +213,11 @@ def check_requests(request_type, auth_file, worksheet_key):
     """Check for new approved requests"""
     # Some definitions that should eventually be set in config
     TIMESTAMP_FORMAT = "%d %b %Y %H:%M:%S"
-    REMINDER_START = timedelta(hours=24)  # hours until first reminder sent
-    REMINDER_INTERVAL = timedelta(hours=4)  # period of reminders
+    # hours until first reminder sent
+    reminder_start = timedelta(hours=int(config.get('reminder', 'start')))
+    # interval to send subsequent reminders
+    reminder_interval = timedelta(hours=int(config.get('reminder',
+                                                       'interval')))
 
     sheet = Spreadsheet(keyfile=auth_file, sheet_id=worksheet_key)
     rows = sheet.get_all_rows('Form Responses 1')
@@ -224,7 +226,7 @@ def check_requests(request_type, auth_file, worksheet_key):
     reminder_list = []
     reminder_rows = []
     now = datetime.now()
-    
+   
     # set some type-specific things
     if request_type == 'Access':
         parse_function = parse_user_row
@@ -258,8 +260,8 @@ def check_requests(request_type, auth_file, worksheet_key):
                 log_request(args.log, timestamp, request_info['user_email'])
         
         # if request is not approved and is >24 hours old, send a reminder
-        elif row[0] == ''and (now >= dateparser.parse(row[3]) +
-                              REMINDER_START):
+        elif row[0] == '' and (now >= dateparser.parse(row[3]) +
+                               reminder_start):
             # but only send if this is the first one, or if enough time
             # has passed since the last one
             if row[2]:
@@ -267,7 +269,7 @@ def check_requests(request_type, auth_file, worksheet_key):
             else:
                 last_sent = None
 
-            if not last_sent or (now >= last_sent + REMINDER_INTERVAL):
+            if not last_sent or (now >= last_sent + reminder_interval):
                 request_info = parse_function(row)
                 reminder_list.append(request_info)
                 reminder_rows.append(idx)
@@ -282,7 +284,7 @@ def check_requests(request_type, auth_file, worksheet_key):
      
     if reminder_list:
         send_reminder(request_type=request_type,
-                      reminder_list=reminder_list,
+                      reminders=reminder_list,
                       worksheet_key=worksheet_key)
         timestamp_spreadsheet(sheet, timestamp, reminder_rows, column=2)
 
@@ -306,7 +308,6 @@ if __name__ == '__main__':
     # for auth_file, quota_auth_file, or helpdesk_template
     auth_file = get_absolute_path(config.get('excelsheet', 'auth_file'))
     worksheet_key = config.get('excelsheet', 'worksheet_key')
-    email_defaults = config.items('email_defaults')
     helpdesk_email = config.get('helpdesk', 'email')
     helpdesk_template = get_absolute_path(config.get('helpdesk', 'template'))
     reminder_email = config.get('reminder', 'email')
