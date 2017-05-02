@@ -79,16 +79,20 @@ def parse_quota_row(cells):
     """Parse the new approved Quota request row"""
     # NOTE: cells[16] is a required field in the Google Form, so it is safe
     # to assume cells[0:15] exists.
-    email = cells[3].replace(u'\xa0', ' ').strip()
+    # cells[0] is Approved
+    # cells[1] is Helpdesk Notified
+    # cells[2] is Reminder Sent
+    # cells[3] is Timestamp
+    email = cells[4].replace(u'\xa0', ' ').strip()
     user_info = {'user_name': email,
                  'user_email': email,
-                 'first_name': cells[4],
-                 'last_name': cells[5],
-                 # cells[6] is Organization
-                 'project': cells[7]}
+                 'first_name': cells[5],
+                 'last_name': cells[6],
+                 # cells[7] is Organization
+                 'project': cells[8]}
 
-    # cells[8] is Type of Increase (Temp/Permanent)
-    # cells[9] is End Date (for temp requests)
+    # cells[9] is Type of Increase (Temp/Permanent)
+    # cells[10] is End Date (for temp requests)
 
     comment = 'New quota request for project: {}'.format(user_info['project'])
     comment += "\n\nRequest Details:\n"
@@ -96,13 +100,13 @@ def parse_quota_row(cells):
     # FIXME: this code block is lifted straight from set-quotas.py,
     # farm it out to a function somewhere to streamline updates.  Possibly
     # also update to use a list and for i in range().
-    quotas = {'instances': cells[10],
-              'cores': cells[11],
-              'ram': cells[12],
-              'floatingip': cells[13],
-              'volumes': cells[14],
-              'snapshots': cells[15],
-              'gigabytes': cells[16]}
+    quotas = {'instances': cells[11],
+              'cores': cells[12],
+              'ram': cells[13],
+              'floatingip': cells[14],
+              'volumes': cells[15],
+              'snapshots': cells[16],
+              'gigabytes': cells[17]}
     unchanged_quotas = [q for q in quotas if quotas[q] == '']
     for quota_name in unchanged_quotas:
             del quotas[quota_name]
@@ -218,7 +222,6 @@ def check_requests(request_type, auth_file, worksheet_key):
     # interval to send subsequent reminders
     reminder_interval = timedelta(hours=int(config.get('reminder',
                                                        'interval')))
-
     sheet = Spreadsheet(keyfile=auth_file, sheet_id=worksheet_key)
     rows = sheet.get_all_rows('Form Responses 1')
     timestamp = datetime.now().strftime(TIMESTAMP_FORMAT)
@@ -243,7 +246,7 @@ def check_requests(request_type, auth_file, worksheet_key):
         if (idx == 0) or (row == []):
             # skip header row and blank rows
             continue
-        
+ 
         elif (row[0].lower().strip() == 'approved') and (row[1] == ''):
             # process rows that are marked approved but not notified
             request_info = parse_function(row)
