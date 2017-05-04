@@ -247,7 +247,7 @@ def check_requests(request_type, auth_file, worksheet_key):
         if (idx == 0) or (row == []):
             # skip header row and blank rows
             continue
- 
+
         elif (row[0].lower().strip() == 'approved') and (row[1] == ''):
             # process rows that are marked approved but not notified
             request_info = parse_function(row)
