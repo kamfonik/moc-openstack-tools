@@ -24,6 +24,7 @@ Usage:
 """
 import argparse
 import ConfigParser
+import sys
 from keystoneclient.v3 import client
 from keystoneauth1.identity import v3
 from keystoneauth1 import session
@@ -33,13 +34,7 @@ from moc_utils import get_absolute_path, select_rows
 from quotas import QuotaManager
 from message import TemplateMessage
 import spreadsheet
-
-
-class ProjectNotFoundError(Exception):
-    """The specified project does not exist"""
-    def __init__(self, project_name):
-        message = 'Cannot find project: {}'.format(project_name)
-        super(ProjectNotFoundError, self).__init__(message)
+from moc_exceptions import ItemNotFoundError, NoApprovedRequests
 
 
 def parse_rows(rows, select_project=None):
@@ -119,6 +114,9 @@ def parse_rows(rows, select_project=None):
 
             project_list.append(project)
 
+    if not project_list:
+        raise NoApprovedRequests(row_filter=select_project)
+
     return project_list
 
 
@@ -148,7 +146,7 @@ def match_keystone_project(all_ks_projects, form_project):
                   if form_project.lower() == project.name.lower()]
     
     if not ks_project:
-        raise ProjectNotFoundError(form_project)
+        raise ItemNotFoundError('project', form_project)
     else:
         return ks_project[0]
 
@@ -160,6 +158,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=help_description)
     parser.add_argument('-c', '--config',
                         help='Specify configuration file.')
+    parser.add_argument('--debug', action='store_true',
+                        help='Print additional debugging output.')
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument('--project',
                       help='Process requests from a single project.')
@@ -203,13 +203,14 @@ if __name__ == "__main__":
     sheet = spreadsheet.Spreadsheet(quota_auth_file, quota_worksheet_key)
     rows = sheet.get_all_rows("Form Responses 1")
     
-    project_list = parse_rows(rows, select_project=args.project)
+    try:
+        project_list = parse_rows(rows, select_project=args.project)
+    except NoApprovedRequests as e:
+        print e.message
+        sys.exit(1)
+
     bad_rows = []
     copy_index = []
-
-    if not project_list:
-        # FIXME: make a better exception for this later
-        raise Exception('No approved quota requests found.')
 
     # NOTE: 'project' is the project data from Google Sheets
     # and 'ks_project' is the matching project resource from Keystone
@@ -217,7 +218,7 @@ if __name__ == "__main__":
         try:
             ks_project = match_keystone_project(all_ks_projects,
                                                 project['name'])
-        except ProjectNotFoundError as err:
+        except ItemNotFoundError as err:
             print err.message
             bad_rows.append(project['row'])
             continue
@@ -262,9 +263,9 @@ if __name__ == "__main__":
         copy_rows = [r for r in rows if rows.index(r) in copy_index]
         sheet.append_rows(copy_rows, target="Processed Requests")
         result = sheet.delete_rows(copy_index, 'Form Responses 1')
-    else:
+    elif args.debug:
         print "WARNING: No spreadsheet rows were copied."
     
-    if bad_rows:
+    if bad_rows and args.debug:
         print "WARNING: The following rows were not processed: {}".format(
               bad_rows)
