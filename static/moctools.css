@@ -30,6 +30,10 @@ label {
     padding: 6px;
 }
 
+label.wide {
+    width: 475px;
+}
+
 label.note { 
     font-size: 14px;
     font-style: italic;
@@ -37,6 +41,16 @@ label.note {
     float: left;
     width: 475px;
     clear: left;
+}
+
+label.error { 
+    font-size: 16px;
+    font-style: italic;
+    padding: 5px; 
+    float: left;
+    width: 475px;
+    clear: left;
+    color: red;
 }
 
 input { 

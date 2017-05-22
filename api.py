@@ -14,7 +14,7 @@
 
 
 #import datetime
-#import json
+import json
 #import smtplib
 #import uuid
 #
@@ -53,19 +53,34 @@ def view_test():
 
 @wsgi.app.route('/new_user', methods=['GET'])
 def view_user_form():
-    return render_template('new_user_form.html')
+    project_list = ['Project 1', 'project 2', 'PROJECT 3']
+    return render_template('new_user_form.html', projects=project_list)
 
 @wsgi.app.route('/new_user', methods=['POST'])
 def view_new_user_confirm():
-    form_data = { 'first_name': request.form['first_name'],
-                  'last_name': request.form['last_name'],
-                  'email': request.form['email'],
-                  'confirm_email': request.form['confirm_email'],
-                  'phone': request.form['phone'],
-                  'org': request.form['org'],
-                  'org_role': request.form['org_role'],
-                  'comment': request.form['new_user_comment']}
-    
+#    request_info  = {'first_name': request.form['first_name'],
+#                     'last_name': request.form['last_name'],
+#                     'email': request.form['email']}
+#                     'confirm_email': request.form['confirm_email'] }
+#
+#    new_user_info = { 
+#             'phone': request.form['phone'],
+#             'org': request.form['org'],
+#             'org_role': request.form['org_role'],
+#             'comment': request.form['new_user_comment']}
+#  
+#    new_request = model.Request( , last_name='Kamfonik', email='a_fake_email')
+#    model.db.session.add(new_request)
+#    model.db.session.commit()
+#
+#    new_user = model.NewUser(new_request, 'my_username', 'my_org', 'my_role', 'my_sponsor', '1234', 'testing new users')
+#    model.db.session.add(new_user)
+#    new_proj = model.NewProject(new_request, 'my_project', 'facts about my project', 'user1@moc, user2@moc')
+#    model.db.session.add(new_proj)
+#    model.db.session.commit()
+#
+#   
+#    data. 
     return Response(response='Your request has been submitted.\n{}'.format(form_data), status=200)
 
 #@wsgi.app.route('/', methods=['POST'])
