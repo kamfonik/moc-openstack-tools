@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Kaizen password reset</title>
+    <link rel="stylesheet" type="text/css" href="static/setpass.css"> 
+</head>
+<body>
+
+<h1>Request a Password Reset</h1>
+
+<p>Please fill out the following information to request a password reset for your OpenStack account.</p>
+
+<p>Note that password resets can take up to 1 business day to process.  You will receive an email with a link to use for resetting your password.</p>
+
+<form action="#" method="post">
+    <fieldset>
+        <div>
+            <label>Name:</label>
+            <input name="name"/>
+        </div>
+        <div>
+            <label>Email:</label><input name="email"/>
+            <label class="note">Email address must be associated with your OpenStack account.</label>
+        </div>
+        <div>
+            <label>Confirm email:</label>
+            <input name="confirm_email"/>
+        </div>
+        <div>
+            <label>PIN:</label>
+            <input name="pin"/>
+            <label class="note">You will provide this PIN later to complete the reset process.</label>
+        </div>
+   </fieldset>
+   <br/>
+   <input type="submit" value="Submit">
+</form>
+
+</body>
+</html>

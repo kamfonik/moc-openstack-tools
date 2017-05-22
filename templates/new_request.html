@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MOC Kaizen OpenStack</title>
+    <link rel="stylesheet" type="text/css" href="static/setpass.css"> 
+</head>
+<body>
+
+<h1>Request a New Account</h1>
+
+<p>Welcome!
+
+<form action="#" method="post">
+    <fieldset>
+        <div>
+            <label>What do you need to do?</label>
+            <select name="request_type">
+		<option value="new_user">I need to request a user account.</option>
+                <option value="new_project">I have an account and need to request a new project.</option>
+                <option value="join_project">I have an account and need to join an existing project.</option>
+                <option value="quota">I need to request a change to an existing project's resource quotas</option>
+            </select>
+            <label class="note">If you select "New User Account" you will have the option of also requesting a new project, or joining an existing project.</label>
+        </div>
+   </fieldset>
+   <br/>
+   <input type="submit" value="Submit">
+</form>
+
+</body>
+</html>

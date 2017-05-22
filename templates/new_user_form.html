@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MOC Kaizen OpenStack - New Project</title>
+    <link rel="stylesheet" type="text/css" href="static/moctools.css">
+    <script type = "text/javascript">
+        function check_match(){
+            var email = document.getElementsByName('email');
+            var confirm_email = document.getElementsByName('confirm_email');
+            var error_label = document.getElementsByName("match_error");
+            if (email != confirm_email) {
+                error_label.style.visibility = "visible";
+            } else {
+                error_label.style.visibility = "hidden";
+            }
+        }
+    </script>
+</head>
+<body>
+
+<h1>Request a new OpenStack User Account</h1>
+
+<p>Please fill out the following to request your new account. All fields are required.</p>
+
+
+<form id="newuser" action="#" method="post">
+    <fieldset>
+        <div>
+            <label>First Name: </label>
+            <input name="first_name"/>
+        </div>
+        <div>
+            <label>Last Name: </label>
+            <input name="last_name"/>
+        </div>
+        <div>
+            <label>Email address:</label>
+            <input name="email"/>
+            <label class="note">This will also be your OpenStack username</label>
+        </div>
+	<div>
+            <label>Confirm email address:</label>
+            <input name="confirm_email" onchange="check_match()"/>
+            <label class="note" name="match_error" style="visibility: hidden">"confirm_email"</n>
+        </div>
+        <div>
+            <label>Phone number:</label>
+            <input name="phone"/>
+        </div>
+        <div>
+            <label>Organization:</label>
+            <input name="org"/>
+        </div>
+        <div>
+            <label>Role in Organization:</label>
+            <input name="org_role"/>
+        </div>
+        <div>
+            <label>Comments:</label>
+            <textarea name="new_user_comment" rows="4" cols="50"></textarea>
+        </div>
+        
+   </fieldset>
+   <br/>
+   <input type="submit" value="Submit">
+</form>
+
+</body>
+</html>
