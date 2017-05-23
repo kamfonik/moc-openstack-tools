@@ -6,71 +6,10 @@
     <link rel="stylesheet" type="text/css" href="static/moctools.css">
     <script type = "text/javascript">
         var proj_list = {{ projects | safe }};
-
-        function populate_dropdown(menu, item_list){
-           for (var i = 0; i< item_list.length; i++) {
-               var item_name = item_list[i];
-               var list_entry = document.createElement("option");
-               list_entry.textContent = item_name;
-               list_entry.value = item_name;
-               menu.appendChild(list_entry);
-           }
-        }
-     
-        function check_match(){
-            var email = document.getElementsByName('email')[0].value;
-            var confirm_email = document.getElementsByName('confirm_email')[0].value;
-            var error_label = document.getElementById("match_error");
-            if (email != confirm_email) {
-                error_label.style.visibility = "visible";
-            } else {
-                error_label.style.visibility = "hidden";
-            }
-        }
-
-        // Set the variable form correctly on page load/refresh
-        function first_load(){
-            if (document.getElementById('exists_true').checked) {
-                switch_form(true);
-            } else {
-                switch_form(false);
-            }
-        }
-
-        // Toggle the form between OpenStack login and new user request
-        function switch_form(user_exists){
-            var fieldset = document.getElementById("changing_form");
-            fieldset.style.visibility = "visible"
-            while (fieldset.firstChild){
-                fieldset.removeChild(fieldset.firstChild);
-            }
-            if (user_exists) {
-                field_list = [ 'openstack_username', 'openstack_password' ]
-                redraw_form(fieldset, field_list)
-            } else {
-                field_list = [ 'email', 'confirm_email', 'phone' ]
-                redraw_form(fieldset, field_list);
-            }
-        }
-
-        // Redraw the form based on the provided field list
-        function redraw_form(fieldset, field_list) {
-            for ( var i=0; i<field_list.length; i++) {
-                field_name = field_list[i]
-                var label = document.createElement('label')
-                label.textContent = field_name;
-                fieldset.appendChild(label);
-                var input_box = document.createElement("input");
-                input_box.setAttribute('name', field_name);
-                if (field_name.indexOf('password') > -1 ) {
-                    input_box.setAttribute('type', 'password');
-                }
-                fieldset.appendChild(input_box) 
-            }
-        }
     </script>
+    <script type = "text/javascript" src="static/moctools.js"></script>
 </head>
-<body onload="first_load()">
+<body onload="first_load(proj_list)">
 
 <h1>OpenStack Account Change Requests</h1>
 
@@ -85,14 +24,24 @@
             <input name="last_name"/>
         </div>
         <div>
-            <label class="wide">Do you have an existing Openstack login account?:</label>
+            <label class="wide">Do you have an existing Openstack login account?</label>
             <div>
-                <p><input type="radio" id='exists_true' name="account_exists" value=true onClick="switch_form(true)"/>Yes</p>
-                <p><input type="radio" name="account_exists" value=false onClick="switch_form(false)"/>No</p>
+                <p><input type="radio" id='exists_true' name="account_exists" value=true onClick="switch_form(true, 'user_form')" checked/>Yes</p>
+                <p><input type="radio" name="account_exists" value=false onClick="switch_form(false, 'user_form')"/>No</p>
+            <div>
+        </div>
+        <div>
+            <label class="wide">Do you need to request a new project, or join an existing project?</label>
+            <div>
+                <p><input type="radio" id='new_project' name="project" value=true onClick="switch_project_form(true, proj_list)" checked/>Request New</p>
+                <p><input type="radio" name="project" value=false onClick="switch_project_form(false, proj_list)"/>Join Existing</p>
             <div>
         </div>
     </fieldset>
-    <fieldset id='changing_form'> </fieldset>
+    <fieldset id='user_form'>
+    </fieldset>
+    <fieldset id='project_form'>
+    </fieldset>
     <input type="submit" value="Submit">
 </form>
 

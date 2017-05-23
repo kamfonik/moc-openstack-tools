@@ -21,12 +21,13 @@ import json
 #from email.mime.text import MIMEText
 from flask import Response
 from flask import request, render_template, redirect
-#from keystoneauth1.identity import v3
-#from keystoneauth1 import session
-#from keystoneauth1.exceptions import http as ksa_exceptions
+from keystoneauth1.identity import v3
+from keystoneauth1 import session
+from keystoneauth1.exceptions import http as ksa_exceptions
 #
 #from setpass import config
 #from setpass import model
+import model
 import wsgi
 #from setpass import exception
 #
@@ -58,30 +59,48 @@ def view_user_form():
 
 @wsgi.app.route('/new_user', methods=['POST'])
 def view_new_user_confirm():
-#    request_info  = {'first_name': request.form['first_name'],
-#                     'last_name': request.form['last_name'],
-#                     'email': request.form['email']}
-#                     'confirm_email': request.form['confirm_email'] }
-#
-#    new_user_info = { 
-#             'phone': request.form['phone'],
-#             'org': request.form['org'],
-#             'org_role': request.form['org_role'],
-#             'comment': request.form['new_user_comment']}
-#  
-#    new_request = model.Request( , last_name='Kamfonik', email='a_fake_email')
-#    model.db.session.add(new_request)
-#    model.db.session.commit()
-#
-#    new_user = model.NewUser(new_request, 'my_username', 'my_org', 'my_role', 'my_sponsor', '1234', 'testing new users')
-#    model.db.session.add(new_user)
-#    new_proj = model.NewProject(new_request, 'my_project', 'facts about my project', 'user1@moc, user2@moc')
-#    model.db.session.add(new_proj)
-#    model.db.session.commit()
-#
-#   
-#    data. 
-    return Response(response='Your request has been submitted.\n{}'.format(form_data), status=200)
+    request_info  = {'first_name': request.form['first_name'],
+                     'last_name': request.form['last_name']}
+    
+    user_exists = request.form['account_exists']
+    new_project = request.form['project']
+
+    if user_exists == 'true':
+        os_user = request.form['openstack_username']
+        os_pass = request.form['openstack_password']
+        # KEYSTONE AUTH TO GET USER ID & EMAIL
+        request_info['user_id'] = 'keystone_userID'
+        request_info['email'] = 'keystone_email'        
+    else:
+        request_info['email'] = request.form['email']
+         
+    new_request = model.Request(**request_info)
+    model.db.session.add(new_request)
+
+    if user_exists == 'false': 
+        new_user_info = {'phone': request.form['phone'],
+                         'username': request.form['email'],
+                         'organization': request.form['organization'],
+                         'org_role': request.form['org_role'],
+                         'sponsor': request.form['sponsor'],
+                         'pin': request.form['pin'],
+                         'comment': request.form['comment']}
+        new_user = model.NewUser(new_request, **new_user_info)
+        model.db.session.add(new_user)
+ 
+    if new_project == 'true':
+        project_info = {'project_name': request.form['project_name'],
+                        'description': request.form['project_description']}
+  
+        new_proj = model.NewProject(new_request, **project_info)
+        model.db.session.add(new_proj) 
+    else:
+        # HERE YOU WOULD GET KEYSTONE PROJ ID
+        new_request.project_id = "keystone_id_existing_project"
+ 
+    model.db.session.commit()
+      
+    return Response(response='Your request has been submitted.\n{}'.format(user_exists), status=200)
 
 #@wsgi.app.route('/', methods=['POST'])
 #def set_password():
@@ -248,4 +267,4 @@ def view_new_user_confirm():
 
 
 if __name__ == '__main__':
-    wsgi.app.run(port=5001, host='0.0.0.0')
+    wsgi.app.run(port=5001, host='0.0.0.0', debug=True)

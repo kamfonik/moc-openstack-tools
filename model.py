@@ -23,7 +23,7 @@ from config import set_config_file
 
 
 config = ConfigParser.ConfigParser()
-config.read(set_config_file('settings.ini'))
+config.read(set_config_file('/home/kamfonik/moc-openstack-tools/settings.ini'))
 database_uri = config.get('database', 'uri')
 wsgi.app.config['SQLALCHEMY_DATABASE_URI'] = database_uri
 db = SQLAlchemy(wsgi.app)
@@ -38,8 +38,8 @@ class Request(db.Model):
     first_name = db.Column(db.String(64), nullable=False)
     last_name = db.Column(db.String(64), nullable=False)
     email = db.Column(db.String(64), nullable=False)
-    user_id = db.Column(db.String(64), unique=True)
-    project_id = db.Column(db.String(64), unique=True)
+    user_id = db.Column(db.String(64))
+    project_id = db.Column(db.String(64))
     quota_change = db.Column(db.Boolean)
 
     def __init__(self, first_name, last_name, email, user_id=None,
@@ -66,18 +66,20 @@ class NewUser(db.Model):
         db.Integer, db.ForeignKey('requests.id'), nullable=False)
     request = relationship(Request)
     username = db.Column(db.String(64), nullable=False)
+    phone = db.Column(db.String(64), nullable=False)
     organization = db.Column(db.String(64), nullable=False)
-    role = db.Column(db.String(64), nullable=False)
+    org_role = db.Column(db.String(64), nullable=False)
     sponsor = db.Column(db.String(64), nullable=False)
     pin = db.Column(db.String(4), nullable=False)
     comment = db.Column(db.String(255), nullable=False)
      
-    def __init__(self, request, username, organization, role, sponsor, pin,
+    def __init__(self, request, username, phone, organization, org_role, sponsor, pin,
                  comment):
         self.request = request
         self.username = username
+        self.phone = phone
         self.organization = organization
-        self.role = role
+        self.org_role = org_role
         self.sponsor = sponsor
         self.pin = pin
         self.comment = comment
@@ -93,7 +95,7 @@ class NewProject(db.Model):
     description = db.Column(db.String(255), nullable=False)
     add_users = db.Column(db.String(255), nullable=False)
     
-    def __init__(self, request, project_name, description, add_users):
+    def __init__(self, request, project_name, description, add_users='blank'):
         self.request = request
         self.project_name = project_name
         self.description = description
