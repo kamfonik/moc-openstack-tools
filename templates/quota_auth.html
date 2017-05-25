@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MOC Kaizen OpenStack - New Project</title>
+    <link rel="stylesheet" type="text/css" href="static/moctools.css">
+    <!--script type = "text/javascript" src="static/moctools.js"></script-->
+</head>
+<body>
+
+<h1>Request Changes to your Project Quotas</h1>
+
+<form id="openstack_auth" action="/quotas" method="post">
+    <fieldset name="quota_auth">
+        <div>
+            <label>OpenStack username: </label>
+            <input name="ks_user"/>
+        </div>
+        <div>
+            <label>OpenStack password: </label>
+            <input type=password name="ks_password"/>
+        </div>
+    </fieldset>
+    <input type="submit" value="Continue">
+</form>
+</body>
+</html>

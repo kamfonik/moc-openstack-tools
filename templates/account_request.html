@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MOC Kaizen OpenStack - New Project</title>
+    <link rel="stylesheet" type="text/css" href="static/moctools.css">
+    <script type = "text/javascript">
+        var proj_list = {{ projects | safe }};
+    </script>
+    <script type = "text/javascript" src="static/moctools.js"></script>
+</head>
+<body onload="first_load(proj_list)">
+
+<h1>OpenStack Account Change Requests</h1>
+
+<form id="user_info" action="#" method="post">
+    <fieldset name="universal_info">
+        <div>
+            <label>First Name: </label>
+            <input name="first_name"/>
+        </div>
+        <div>
+            <label>Last Name: </label>
+            <input name="last_name"/>
+        </div>
+        <div>
+            <label class="wide">Do you have an existing Openstack login account?</label>
+            <div>
+                <p><input type="radio" id='exists_true' name="account_exists" value=true onClick="switch_form(true, 'user_form')" checked/>Yes</p>
+                <p><input type="radio" name="account_exists" value=false onClick="switch_form(false, 'user_form')"/>No</p>
+            <div>
+        </div>
+        <div>
+            <label class="wide">Do you need to request a new project, or join an existing project?</label>
+            <div>
+                <p><input type="radio" id='new_project' name="project" value=true onClick="switch_project_form(true, proj_list)" checked/>Request New</p>
+                <p><input type="radio" name="project" value=false onClick="switch_project_form(false, proj_list)"/>Join Existing</p>
+            <div>
+        </div>
+    </fieldset>
+    <fieldset id='user_form'>
+    </fieldset>
+    <fieldset id='project_form'>
+    </fieldset>
+    <input type="submit" value="Submit">
+</form>
+
+</body>
+</html>

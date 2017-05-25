@@ -15,14 +15,15 @@
 
 #import datetime
 import json
+import random # temp import
 #import smtplib
 #import uuid
 #
 #from email.mime.text import MIMEText
 from flask import Response
-from flask import request, render_template, redirect
+from flask import request, render_template, redirect, session
 from keystoneauth1.identity import v3
-from keystoneauth1 import session
+from keystoneauth1 import session as ks_session
 from keystoneauth1.exceptions import http as ksa_exceptions
 #
 #from setpass import config
@@ -35,29 +36,18 @@ application = wsgi.app
 #
 #CONF = config.CONF
 
-@wsgi.app.route('/', methods=['GET'])
-def view_new_request():
-    return render_template('new_request.html')
-
-@wsgi.app.route('/', methods=['POST'])
-def view_requested_form():
-    request_type = request.form['request_type']
-    return redirect('/%s' % request_type)
-
 @wsgi.app.route('/test', methods=['GET'])
 def view_test():
-    token = request.args.get('token', None)
-    if not token:
-        return Response(response='TESTING SERVER', status=404)
-    
-    return render_template('reset_form.html')
+    return Response(response='TESTING SERVER', status=200)
 
-@wsgi.app.route('/new_user', methods=['GET'])
-def view_user_form():
+@wsgi.app.route('/accounts', methods=['GET'])
+def view_new_request():
+    # FIXME: something like project_list = get_openstack_projects()
     project_list = ['Project 1', 'project 2', 'PROJECT 3']
-    return render_template('new_user_form.html', projects=project_list)
+    return render_template('account_request.html', projects=project_list)
 
-@wsgi.app.route('/new_user', methods=['POST'])
+
+@wsgi.app.route('/accounts', methods=['POST'])
 def view_new_user_confirm():
     request_info  = {'first_name': request.form['first_name'],
                      'last_name': request.form['last_name']}
@@ -95,176 +85,39 @@ def view_new_user_confirm():
         new_proj = model.NewProject(new_request, **project_info)
         model.db.session.add(new_proj) 
     else:
-        # HERE YOU WOULD GET KEYSTONE PROJ ID
+        # FIXME: sometihng like new_request.project_id = get_keystone_project_id() 
         new_request.project_id = "keystone_id_existing_project"
  
     model.db.session.commit()
       
-    return Response(response='Your request has been submitted.\n{}'.format(user_exists), status=200)
+    return Response(response='Request ID # {} has been submitted for approval.'.format(new_request.id), status=200)
 
-#@wsgi.app.route('/', methods=['POST'])
-#def set_password():
-#    token = request.args.get('token')
-#    password = request.form['password']
-#    pin = request.form['pin']
-#
-#    if not token or not password or not pin:
-#        return Response(response='Missing token/pin/password!', status=400)
-#
-#    try:
-#        _set_password(token, pin, password)
-#    except exception.TokenNotFoundException:
-#        return Response(response='Token not found', status=404)
-#    except exception.TokenExpiredException:
-#        return Response(response='Token expired', status=403)
-#    except exception.WrongPinException:
-#        return Response(response='Wrong pin', status=403)
-#    except exception.OpenStackError as e:
-#        return Response(response=e.message, status=500)
-#    except exception.AccountLocked:
-#        return Response(response='Account locked, too many wrong attempts!',
-#                        status=403)
-#
-#    return Response(response='Password set.', status=200)
-#
-#
-#def _set_openstack_password(user_id, old_password, new_password):
-#    auth = v3.Password(auth_url=CONF.auth_url,
-#                       user_id=user_id,
-#                       password=old_password)
-#
-#    sess = session.Session(auth=auth)
-#
-#    url = '%s/users/%s/password' % (CONF.auth_url, user_id)
-#    payload = {'user': {'password': new_password,
-#                        'original_password': old_password}}
-#
-#    header = {'Content-Type': 'application/json'}
-#    r = sess.post(url, headers=header, data=json.dumps(payload))
-#
-#    if 200 <= r.status_code < 300:
-#        return True
-#    else:
-#        raise exception.OpenStackError(r.text)
-#
-#
-#def _check_admin_token(token):
-#    auth = v3.Token(auth_url=CONF.auth_url,
-#                    token=token,
-#                    project_name=CONF.admin_project_name,
-#                    project_domain_id=CONF.admin_project_domain_id)
-#
-#    sess = session.Session(auth=auth)
-#    # If we're able to scope succesfully to the admin project with this
-#    # token, assume admin.
-#    try:
-#        sess.get_token()
-#        return True
-#    except ksa_exceptions.Unauthorized:
-#        return False
-#
-#
-#def _increase_attempts(user):
-#    user.attempts += 1
-#    model.db.session.commit()
-#
-#
-#def _set_password(token, pin, password):
-#    # Find user for token
-#    user = model.User.find(token=token)
-#
-#    if user is None:
-#        raise exception.TokenNotFoundException
-#
-#    if user.attempts > CONF.max_attempts:
-#        raise exception.AccountLocked
-#
-#    if pin != user.pin:
-#        _increase_attempts(user)
-#        raise exception.WrongPinException
-#
-#    delta = datetime.datetime.utcnow() - user.updated_at
-#    if delta.total_seconds() > CONF.token_expiration:
-#        raise exception.TokenExpiredException
-#
-#    _set_openstack_password(user.user_id, user.password, password)
-#
-#    model.db.session.delete(user)
-#    model.db.session.commit()
-#
-#
-#@wsgi.app.route('/token/<user_id>', methods=['PUT'])
-#def add(user_id):
-#    token = request.headers.get('x-auth-token', None)
-#
-#    if not token:
-#        return Response(response='Unauthorized', status=401)
-#
-#    if not _check_admin_token(token):
-#        return Response(response='Forbidden', status=403)
-#
-#    payload = json.loads(request.data)
-#
-#    user = model.User.find(user_id=user_id)
-#    if user:
-#        if 'pin' in payload:
-#            user.pin = payload['pin']
-#        if 'password' in payload:
-#            user.password = payload['password']
-#
-#        user.token = str(uuid.uuid4())
-#        user.update_timestamp_and_attempts()
-#    else:
-#        user = model.User(
-#            user_id=user_id,
-#            token=str(uuid.uuid4()),
-#            pin=payload['pin'],
-#            password=payload['password']
-#        )
-#        model.db.session.add(user)
-#
-#    model.db.session.commit()
-#    return Response(response=user.token, status=200)
-#
-#
-#@wsgi.app.route('/reset', methods=['GET'])
-#def view_reset_form():
-#    return render_template('reset_form.html')
-#
-#
-#@wsgi.app.route('/reset', methods=['POST'])
-#def reset_password():
-#    name = request.form['name']
-#    username = request.form['username']
-#    pin = request.form['pin']
-#
-#    if not name or not username or not pin:
-#        return Response(response='Missing name/pin/username!', status=400)
-#
-#    _notify_helpdesk(name=name, username=username, pin=pin)
-#
-#    return Response(response='The request has been forwarded to the helpdesk.',
-#                    status=200)
-#
-#
-#def _notify_helpdesk(**kwargs):
-#    with open(CONF.helpdesk_template, 'r') as f:
-#        msg_body = f.read()
-#    msg_body = msg_body.format(**kwargs)
-#
-#    sender = CONF.ticket_sender
-#    recipient = CONF.helpdesk_email
-#    msg = MIMEText(msg_body)
-#    msg['Subject'] = CONF.ticket_subject
-#    msg['From'] = sender
-#    msg['To'] = recipient
-#
-#    server = smtplib.SMTP(CONF.mail_ip, CONF.mail_port)
-#    server.ehlo()
-#    server.starttls()
-#
-#    server.sendmail(sender, recipient, msg.as_string())
+@wsgi.app.route('/quotas', methods=['GET'])
+def view_quota_auth():
+    return render_template('quota_auth.html')
 
+@wsgi.app.route('/quotas', methods=['POST'])
+def view_new_quotas():
+    username = request.form['ks_user']
+    password = request.form['ks_password']
+
+    # something like:
+    #   ks_user = get_keystone_user(username, password)
+    #   project_list = get_user_projects(ks_user)
+    #   quota_list = {};
+    #   for p in project_list:
+    #       quota_list[p] = get_project_quotas(p)
+ 
+    # For now we have dummy data:
+    project_list = ["dummy project 1", "dummy project 2", "dummy project 3"] 
+    quota_list = {}; 
+    for p in project_list:
+        quota_list[p] = {};
+        quota_list[p]['vcpus'] = random.randint(1,20)
+        quota_list[p]['ips'] = random.randint(1,20)
+        quota_list[p]['instances'] = random.randint(1,20)
+      
+    return render_template('quotas.html', projects=project_list, quotas=quota_list)
 
 if __name__ == '__main__':
     wsgi.app.run(port=5001, host='0.0.0.0', debug=True)

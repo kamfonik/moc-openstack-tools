@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MOC Kaizen OpenStack - New Project</title>
+    <link rel="stylesheet" type="text/css" href="static/moctools.css">
+    <script type = "text/javascript">
+        var proj_list = {{ projects | safe }};
+        var quota_list = {{ quotas | safe }};
+        /*var quota_list = {};
+        for (i=0; i<proj_list.length; i++) {
+            key = proj_list[i];
+            quota_list[key] = {};
+            quota_list[key]['instances'] = 9;
+            quota_list[key]['vcpus'] = 10;
+            quota_list[key]['ips'] = 2;
+        }*/
+        //var quota_list = ['quota1', 'quota2', 'quota3'];
+        function page_load() {
+            var menu = document.getElementById('project_menu');
+            populate_dropdown(menu, proj_list);
+            switch_project(menu.value);
+        }
+        function draw_quota_form(proj_name) {
+            var quota_fields = document.getElementById('quota_fields');
+            while (quota_fields.firstChild){
+                quota_fields.removeChild(quota_fields.firstChild);
+            }
+            var legend = document.createElement('legend');
+            legend.textContent = "Change quotas for project: " + proj_name
+            current_quotas = quota_list[proj_name];
+            for (key in current_quotas) {
+                var div = document.createElement('div');
+                quota_fields.appendChild(div); 
+                var label = document.createElement('label');
+                label.textContent = key;
+                div.appendChild(label);
+                var quota = document.createElement('input');
+                div.appendChild(quota);
+                var current = document.createElement('label');
+                current.textContent = "Current Value: " + current_quotas[key];
+                div.appendChild(current);
+            }
+         }
+
+         function switch_project(proj_name) {
+             draw_quota_form(proj_name);
+         }        
+    </script>
+    <script type = "text/javascript" src="static/moctools.js"></script>
+</head>
+<body onload="page_load()">
+
+<h1>OpenStack Quota Change Requests</h1>
+
+<form id="quota_form" action="#" method="post">
+    <fieldset name="choose_project">
+        <div>
+            <label class="wide">Choose a project to request new quotas:</label>
+            <div>
+                <select id='project_menu' onChange="switch_project(this.value)"></select>
+            </div>
+        </div>
+    </fieldset>
+    <fieldset id='quota_fields'></fieldset>
+    <input type="submit" value="Submit">
+</form>
+
+</body>
+</html>
